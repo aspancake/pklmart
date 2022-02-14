@@ -885,10 +885,10 @@ returner_switch_yes_button = Checkbutton(root, text='Returning Team Switch (F2)'
 returner_switch_yes_button.grid(row=14, column=2, sticky='W')
 
 left_player_third_box = Checkbutton(root, text='Left Player hit the Third (7)', variable=leftplayerThird)
-left_player_third_box.grid(row=15, column=1)
+left_player_third_box.grid(row=15, column=1, sticky='W')
 
 right_player_third_box = Checkbutton(root, text='Right Player hit the Third (8)', variable=rightplayerThird)
-right_player_third_box.grid(row=15, column=2)
+right_player_third_box.grid(row=15, column=2, sticky='W')
 
 third_drop_box = Checkbutton(root, text='Third Shot Drop (4)', variable=thirdDrop)
 third_drop_box.grid(row=16, column=1, sticky='W')
@@ -929,7 +929,7 @@ atp_cnt_entry.grid(row=18, column=3)
 
 # reset count values
 reset_cnts_button = Button(root, text='Reset Count Values', command=reset_cnts)
-reset_cnts_button.grid(row=20, column=3)
+reset_cnts_button.grid(row=20, column=2)
 
 # points scored
 team_a_pt_label = Label(root, text="Team A", font='Arial 9 bold')
@@ -984,10 +984,19 @@ end_game_button = Button(root, text='Submit - Game Complete', command=create_fil
 end_game_button.grid(row=28, column=3, pady=(20,5))
 
 # information box
-info_title_label = Label(root, text='Instructions', font='Arial 11 bold')
+info_title_label = Label(root, text='Instructions & Tips', font='Arial 11 bold')
 info_title_label.grid(row=1, column=4, columnspan=3)
 
-desc_label = Label(root, text='• Team A MUST be the team serving first\n• Do NOT enter points that are replayed\n• Have fun!',\
+desc_label = Label(root, text='1) Enter Match Information\n' + \
+                '• Team A MUST be the team serving first\n \n' + \
+                '2) Hit "Begin Match" and begin recording points\n' + \
+                '• Use hotheys to quickly input data (e.g. record a lob with the Up Arrow)\n' + \
+                '• Occasionally validate score against video stream (if possible)\n' + \
+                '• Do NOT enter points that are replayed\n' + \
+                '• Make a mistake? No problem - use the "Undo" feature\n' + \
+                '• [Placeholder for defining an unforced error]\n\n' + \
+                '3) Upon completion, hit "Submit - Game Complete"\n' + \
+                '• Ensure file has been saved before closing window',
                    borderwidth = 3, relief="ridge", justify='left')
 desc_label.grid(row=2, column=4, columnspan=3, rowspan=3)
 
