@@ -32,6 +32,12 @@ lob_cnt = []
 ernie_cnt = []
 atp_cnt = []
 
+third_player_side = []
+third_shot_type = []
+
+ending_type = []
+ending_player = []
+
 global server_num
 server_num = 2
 
@@ -130,9 +136,37 @@ def append_constants():
     atp_cnt_val = atp_cnt_entry.get()
     atp_cnt.append(atp_cnt_val)
     
+    left_player_third_val = leftplayerThird.get()
+    right_player_third_val = rightplayerThird.get()
+    if left_player_third_val == 1:
+        third_side_val = 'L'
+    elif right_player_third_val == 1:
+        third_side_val = 'R'
+    else:
+        third_side_val = 'N/A'
+    third_player_side.append(third_side_val)
+    
+    third_drop_val = thirdDrop.get()
+    third_drive_val = thirdDrive.get()
+    third_lob_val = thirdLob.get()
+    if third_drop_val == 1:
+        third_type = 'Drop'
+    elif third_drive_val == 1:
+        third_type = 'Drive'
+    elif third_lob_val == 1:
+        third_type = 'Lob'
+    else:
+        third_type = 'N/A'
+    third_shot_type.append(third_type)
+    
     # resetting values
     serverSwitch.set(0)
     returnerSwitch.set(0)
+    leftplayerThird.set(0)
+    rightplayerThird.set(0)
+    thirdDrop.set(0)
+    thirdDrive.set(0)
+    thirdLob.set(0)
     
     # resetting entry widgets requires a different approach
     rally_length_entry.delete(0, 'end')
@@ -205,7 +239,10 @@ def undo_last_entry():
     del lob_cnt[-1]
     del ernie_cnt[-1]
     del atp_cnt[-1]
-    
+    del third_player_side[-1]
+    del third_shot_type[-1]
+    del ending_type[-1]
+    del ending_player[-1]
     
     # figure out who the server was
     serving_team_id = calc_server()
@@ -222,6 +259,11 @@ def undo_last_entry():
     # resetting counters
     serverSwitch.set(0)
     returnerSwitch.set(0)
+    leftplayerThird.set(0)
+    rightplayerThird.set(0)
+    thirdDrop.set(0)
+    thirdDrive.set(0)
+    thirdLob.set(0)
     
     # resetting entry widgets requires a different approach
     rally_length_entry.delete(0, 'end')
@@ -244,8 +286,7 @@ def undo_last_entry():
     global lobs 
     lobs = 0
     
-    
-def team_score_a():
+def team_score_a_w1():
     # validate entries
     val_ind = entry_validation()
     if val_ind == False:
@@ -256,6 +297,8 @@ def team_score_a():
     
     # outcomes
     pt_outcome.append('A')
+    ending_type.append('Winner')
+    ending_player.append(team_a_player_1_entry.get())
     
     # figure out who the server was
     serving_team_id = calc_server()
@@ -269,7 +312,111 @@ def team_score_a():
     recent_events_str = get_recent_events()
     recentEvents.set(recent_events_str)
     
-def team_score_b():  
+def team_score_a_w2():
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('A')
+    ending_type.append('Winner')
+    ending_player.append(team_a_player_2_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_a_u1():
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('A')
+    ending_type.append('Unforced Error')
+    ending_player.append(team_b_player_1_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_a_u2():
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('A')
+    ending_type.append('Unforced Error')
+    ending_player.append(team_b_player_2_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_a_o():
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('A')
+    ending_type.append('Other')
+    ending_player.append('N/A')
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_b_w1():  
     # validate entries
     val_ind = entry_validation()
     if val_ind == False:
@@ -280,6 +427,8 @@ def team_score_b():
     
     # outcomes
     pt_outcome.append('B')
+    ending_type.append('Winner')
+    ending_player.append(team_b_player_1_entry.get())
     
     # figure out who the server was
     serving_team_id = calc_server()
@@ -293,6 +442,109 @@ def team_score_b():
     recent_events_str = get_recent_events()
     recentEvents.set(recent_events_str)
     
+def team_score_b_w2():  
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('B')
+    ending_type.append('Winner')
+    ending_player.append(team_b_player_2_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_b_u1():  
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('B')
+    ending_type.append('Unforced Error')
+    ending_player.append(team_a_player_1_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_b_u2():  
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('B')
+    ending_type.append('Unforced Error')
+    ending_player.append(team_a_player_2_entry.get())
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
+    
+def team_score_b_o():  
+    # validate entries
+    val_ind = entry_validation()
+    if val_ind == False:
+        return
+    
+    # standard appending
+    append_constants()
+    
+    # outcomes
+    pt_outcome.append('B')
+    ending_type.append('Other')
+    ending_player.append('N/A')
+    
+    # figure out who the server was
+    serving_team_id = calc_server()
+    serving_team.append(serving_team_id)
+    
+    # update values being displayed
+    currScore.set(calc_score())
+    currServer.set(serving_team_id) # already ran the function...
+    
+    # update history of events entered
+    recent_events_str = get_recent_events()
+    recentEvents.set(recent_events_str)
     
 def team_timeout_a():
     # validate entries
@@ -304,7 +556,9 @@ def team_timeout_a():
     append_constants()
     
     # outcomes
-    pt_outcome.append('TOa')
+    pt_outcome.append('TO_A')
+    ending_type.append('')
+    ending_player.append('')
     
     # figure out who the server was
     serving_team_id = calc_server()
@@ -329,7 +583,9 @@ def team_timeout_b():
     append_constants()
     
     # outcomes
-    pt_outcome.append('TOb')
+    pt_outcome.append('TO_B')
+    ending_type.append('')
+    ending_player.append('')
     
     # figure out who the server was
     serving_team_id = calc_server()
@@ -416,6 +672,40 @@ def record_server_switch(event):
 def record_returner_switch(event):
     returnerSwitch.set(1)
     
+def record_left_third(event):
+    leftplayerThird.set(1)
+    rightplayerThird.set(0)
+    
+def record_right_third(event):
+    leftplayerThird.set(0)
+    rightplayerThird.set(1)
+    
+def record_third_drop(event):
+    thirdDrop.set(1)
+    thirdDrive.set(0)
+    thirdLob.set(0)
+    
+def record_third_drive(event):
+    thirdDrop.set(0)
+    thirdDrive.set(1)
+    thirdLob.set(0)
+    
+def record_third_lob(event):
+    thirdDrop.set(0)
+    thirdDrive.set(0)
+    thirdLob.set(1)
+    
+def begin_match():
+    team_a_pt_button_1.config(text='Pt Won: ' + team_a_player_1_entry.get() + ' Winner')
+    team_a_pt_button_2.config(text='Pt Won: ' + team_a_player_2_entry.get() + ' Winner')
+    team_b_pt_button_1.config(text='Pt Won: ' + team_b_player_1_entry.get() + ' Winner')
+    team_b_pt_button_2.config(text='Pt Won: ' + team_b_player_2_entry.get() + ' Winner')
+    
+    team_a_pt_unf_button_1.config(text='Pt Won: ' + team_b_player_1_entry.get() + ' Unforced Error')
+    team_a_pt_unf_button_2.config(text='Pt Won: ' + team_b_player_2_entry.get() + ' Unforced Error')
+    team_b_pt_unf_button_1.config(text='Pt Won: ' + team_a_player_1_entry.get() + ' Unforced Error')
+    team_b_pt_unf_button_2.config(text='Pt Won: ' + team_a_player_2_entry.get() + ' Unforced Error')
+
 def reset_cnts():
     rally_length_entry.delete(0, 'end')
     
@@ -460,6 +750,17 @@ serverSwitch = IntVar()
 serverSwitch.set(0)
 returnerSwitch = IntVar()
 returnerSwitch.set(0)
+
+leftplayerThird = IntVar()
+leftplayerThird.set(0)
+rightplayerThird = IntVar()
+rightplayerThird.set(0)
+thirdDrop = IntVar()
+thirdDrop.set(0)
+thirdDrive = IntVar()
+thirdDrive.set(0)
+thirdLob = IntVar()
+thirdLob.set(0)
 
 global shots
 shots = 0  
@@ -540,102 +841,147 @@ team_b_left_player_label.grid(row=11, column=1)
 team_b_player_2_entry = Entry(root)
 team_b_player_2_entry.grid(row=11, column=2)
 
+begin_match_button = Button(root, text='Begin Match', command=begin_match)
+begin_match_button.grid(row=12, column=1, columnspan=2, pady=(5,0))
+
 # server
 team_serving_label = Label(root, text="Serving Team", font='Arial 11 bold')
-team_serving_label.grid(row=12, column=6, pady=(20, 0))
+team_serving_label.grid(row=13, column=6, pady=(20, 0))
 
 team_serving_display = Label(root, textvariable=currServer, font='Arial 11')
-team_serving_display.grid(row=13, column=6)
+team_serving_display.grid(row=14, column=6)
 
 # log display
 recent_entries_title_label = Label(root, text='Log', font='Arial 11 bold')
-recent_entries_title_label.grid(row=14, column=5, columnspan=2)
+recent_entries_title_label.grid(row=15, column=5, columnspan=2)
 
 recent_entries_label = Label(root, textvariable=recentEvents, justify='left', borderwidth = 3, relief="sunken")
-recent_entries_label.grid(row=15, column=5, columnspan=2, rowspan=9, padx=(30,5))
+recent_entries_label.grid(row=16, column=5, columnspan=2, rowspan=9, padx=(30,5))
 
 # display score
 score_label = Label(root, text='Current Score', font='Arial 11 bold')
-score_label.grid(row=12, column=5, columnspan=1, padx=(30,5), pady=(20, 0))
+score_label.grid(row=13, column=5, columnspan=1, padx=(30,5), pady=(20, 0))
 
 # score_desc_label = Label(root, text='(Team A:Team B:Server #)', font='Arial 11')
 # score_desc_label.grid(row=2, column=4, columnspan=2)
 
 score_display = Label(root, textvariable=currScore, font='Arial 11')
-score_display.grid(row=13, column=5, columnspan=1, padx=(30,5))
+score_display.grid(row=14, column=5, columnspan=1, padx=(30,5))
 
 # area to enter point specific information
 entry_label = Label(root, text='Enter Values', font='Arial 11 bold')
-entry_label.grid(row=12, column=1, columnspan=3, pady=(20, 5))
+entry_label.grid(row=13, column=1, columnspan=3, pady=(20, 5))
 
 # server_switch_label = Label(root, text='Serving Team Switch?')
 # server_switch_label.grid(row=13, column=1)
 
 server_switch_yes_button = Checkbutton(root, text='Serving Team Switch (F1)', variable=serverSwitch)
-server_switch_yes_button.grid(row=14, column=1)
+server_switch_yes_button.grid(row=14, column=1, sticky='W')
 
 # returner_switch_label = Label(root, text='Return Team Switch?')
 # returner_switch_label.grid(row=13, column=2)
 
 returner_switch_yes_button = Checkbutton(root, text='Returning Team Switch (F2)', variable=returnerSwitch) 
-returner_switch_yes_button.grid(row=14, column=2)
+returner_switch_yes_button.grid(row=14, column=2, sticky='W')
+
+left_player_third_box = Checkbutton(root, text='Left Player hit the Third (7)', variable=leftplayerThird)
+left_player_third_box.grid(row=15, column=1)
+
+right_player_third_box = Checkbutton(root, text='Right Player hit the Third (8)', variable=rightplayerThird)
+right_player_third_box.grid(row=15, column=2)
+
+third_drop_box = Checkbutton(root, text='Third Shot Drop (4)', variable=thirdDrop)
+third_drop_box.grid(row=16, column=1, sticky='W')
+
+third_drive_box = Checkbutton(root, text='Third Shot Drive (5)', variable=thirdDrive)
+third_drive_box.grid(row=16, column=2, sticky='W')
+
+third_lob_box = Checkbutton(root, text='Third Shot Lob (6)', variable=thirdLob)
+third_lob_box.grid(row=16, column=3, sticky='W')
 
 rally_len_label = Label(root, text='Rally Length (↓)')
-rally_len_label.grid(row=17, column=1)
+rally_len_label.grid(row=19, column=1)
 
 rally_length_entry = Entry(root)
 rally_length_entry.insert(0, '0')
-rally_length_entry.grid(row=18, column=1)
+rally_length_entry.grid(row=20, column=1)
 
 lob_cnt_label = Label(root, text='Lob Count (↑)')
-lob_cnt_label.grid(row=15, column=1)
+lob_cnt_label.grid(row=17, column=1)
 
 lob_cnt_entry = Entry(root)
 lob_cnt_entry.insert(0, '0')
-lob_cnt_entry.grid(row=16, column=1)
+lob_cnt_entry.grid(row=18, column=1)
 
 ernie_cnt_label = Label(root, text='Ernie Count (←)')
-ernie_cnt_label.grid(row=15, column=2)
+ernie_cnt_label.grid(row=17, column=2)
 
 ernie_cnt_entry = Entry(root)
 ernie_cnt_entry.insert(0, '0')
-ernie_cnt_entry.grid(row=16, column=2)
+ernie_cnt_entry.grid(row=18, column=2)
 
 atp_cnt_label = Label(root, text='ATP Count (→)')
-atp_cnt_label.grid(row=15, column=3)
+atp_cnt_label.grid(row=17, column=3)
 
 atp_cnt_entry = Entry(root)
 atp_cnt_entry.insert(0, '0')
-atp_cnt_entry.grid(row=16, column=3)
+atp_cnt_entry.grid(row=18, column=3)
 
 # reset count values
 reset_cnts_button = Button(root, text='Reset Count Values', command=reset_cnts)
-reset_cnts_button.grid(row=17, column=3)
+reset_cnts_button.grid(row=20, column=3)
 
 # points scored
-team_pt_label = Label(root, text="Record Event", font='Arial 9 bold')
-team_pt_label.grid(row=19, column=1, columnspan=2)
+team_a_pt_label = Label(root, text="Team A", font='Arial 9 bold')
+team_a_pt_label.grid(row=21, column=1, pady=(5,0))
 
-team_a_pt_button = Button(root, text='Team A: Pt Won', command=team_score_a)
-team_a_pt_button.grid(row=20, column=1)
+team_b_pt_label = Label(root, text="Team B", font='Arial 9 bold')
+team_b_pt_label.grid(row=21, column=3, pady=(5,0))
 
-team_b_pt_button = Button(root, text='Team B: Pt Won', command=team_score_b)
-team_b_pt_button.grid(row=20, column=2)
+team_a_pt_button_1 = Button(root, text='Pt Won: [Player A1] Winner', command=team_score_a_w1)
+team_a_pt_button_1.grid(row=22, column=1, sticky='W')
+
+team_a_pt_button_2 = Button(root, text='Pt Won: [Player A2] Winner', command=team_score_a_w2)
+team_a_pt_button_2.grid(row=23, column=1, sticky='W')
+
+team_a_pt_unf_button_1 = Button(root, text='Pt Won: [Player B1] Unf. Error', command=team_score_a_u1)
+team_a_pt_unf_button_1.grid(row=24, column=1, sticky='W')
+
+team_a_pt_unf_button_2 = Button(root, text='Pt Won: [Player B2] Unf. Error', command=team_score_a_u2)
+team_a_pt_unf_button_2.grid(row=25, column=1, sticky='W')
+
+team_a_pt_other_button = Button(root, text='Pt Won: Other', command=team_score_a_o)
+team_a_pt_other_button.grid(row=26, column=1, sticky='W')
+
+team_b_pt_button_1 = Button(root, text='Pt Won: [Player B1] Winner', command=team_score_b_w1)
+team_b_pt_button_1.grid(row=22, column=3, sticky='W')
+
+team_b_pt_button_2 = Button(root, text='Pt Won: [Player B2] Winner', command=team_score_b_w2)
+team_b_pt_button_2.grid(row=23, column=3, sticky='W')
+
+team_b_pt_unf_button_1 = Button(root, text='Pt Won: [Player A1] Unf. Error', command=team_score_b_u1)
+team_b_pt_unf_button_1.grid(row=24, column=3, sticky='W')
+
+team_b_pt_unf_button_2 = Button(root, text='Pt Won: [Player A2] Unf. Error', command=team_score_b_u2)
+team_b_pt_unf_button_2.grid(row=25, column=3, sticky='W')
+
+team_b_pt_other_button = Button(root, text='Pt Won: Other', command=team_score_b_o)
+team_b_pt_other_button.grid(row=26, column=3, sticky='W')
 
 # timout call
-team_a_timeout_button = Button(root, text='Team A: Timeout', command=team_timeout_a)
-team_a_timeout_button.grid(row=21, column=1)
+team_a_timeout_button = Button(root, text='Timeout', command=team_timeout_a)
+team_a_timeout_button.grid(row=27, column=1, sticky='W')
 
-team_b_timeout_button = Button(root, text='Team B: Timeout', command=team_timeout_b)
-team_b_timeout_button.grid(row=21, column=2)
+team_b_timeout_button = Button(root, text='Timeout', command=team_timeout_b)
+team_b_timeout_button.grid(row=27, column=3, sticky='W')
 
 # undo
 undo_button = Button(root, text='Undo last entry', command=undo_last_entry)
-undo_button.grid(row=23, column=1, pady=(20, 5))
+undo_button.grid(row=28, column=1, pady=(20, 5))
 
 # ending the game (but not the match)
 end_game_button = Button(root, text='Submit - Game Complete', command=create_file) # will need to update
-end_game_button.grid(row=24, column=3, pady=(20,5))
+end_game_button.grid(row=28, column=3, pady=(20,5))
 
 # information box
 info_title_label = Label(root, text='Instructions', font='Arial 11 bold')
@@ -652,5 +998,10 @@ root.bind('<Right>', atp_increment)
 root.bind('<Up>', lob_increment)
 root.bind('<F1>', record_server_switch)
 root.bind('<F2>', record_returner_switch)
+root.bind('7', record_left_third)
+root.bind('8', record_right_third)
+root.bind('4', record_third_drop)
+root.bind('5', record_third_drive)
+root.bind('6', record_third_lob)
 
 root.mainloop()
