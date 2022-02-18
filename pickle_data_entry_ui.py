@@ -5,7 +5,7 @@ Created on Mon Jan 31 22:19:37 2022
 @author: alex spancake 
 """
 
-from tkinter import Tk, Label, Button, Entry, StringVar, IntVar, messagebox, Checkbutton
+from tkinter import Tk, Label, Button, Entry, StringVar, IntVar, messagebox, Checkbutton, colorchooser
 from os import chdir
 import pandas as pd
 import datetime
@@ -31,6 +31,10 @@ returner_switch = []
 lob_cnt = []
 ernie_cnt = []
 atp_cnt = []
+dink_cnt = []
+speed_up_cnt = []
+shot_log = []
+user_notes = []
 
 third_player_side = []
 third_shot_type = []
@@ -136,12 +140,30 @@ def append_constants():
     atp_cnt_val = atp_cnt_entry.get()
     atp_cnt.append(atp_cnt_val)
     
+    dink_cnt_val = dink_cnt_entry.get()
+    dink_cnt.append(dink_cnt_val)
+    
+    speed_up_val = speed_up_cnt_entry.get()
+    speed_up_cnt.append(speed_up_val)
+    
+    global shot_log_val
+    shot_log.append(shot_log_val)
+
+    serving_team_id = calc_server()
+    
     left_player_third_val = leftplayerThird.get()
     right_player_third_val = rightplayerThird.get()
-    if left_player_third_val == 1:
+    far_side_ind_A_val = farsideSwitch_A.get()
+    far_side_ind_B_val = farsideSwitch_B.get()
+
+    if left_player_third_val == 1 and serving_team_id == 'A' and far_side_ind_A_val == 0:
         third_side_val = 'L'
-    elif right_player_third_val == 1:
+    elif left_player_third_val == 1 and serving_team_id == 'A' and far_side_ind_A_val == 1:
         third_side_val = 'R'
+    elif right_player_third_val == 1 and serving_team_id == 'B' and far_side_ind_B_val == 0:
+        third_side_val = 'R'
+    elif right_player_third_val == 1 and serving_team_id == 'B' and far_side_ind_B_val == 1:
+        third_side_val = 'L'
     else:
         third_side_val = 'N/A'
     third_player_side.append(third_side_val)
@@ -158,6 +180,9 @@ def append_constants():
     else:
         third_type = 'N/A'
     third_shot_type.append(third_type)
+    
+    user_notes_val = additional_notes_entry.get()
+    user_notes.append(user_notes_val)
     
     # resetting values
     serverSwitch.set(0)
@@ -188,6 +213,21 @@ def append_constants():
     lob_cnt_entry.insert(0, '0')
     global lobs 
     lobs = 0
+    
+    dink_cnt_entry.delete(0, 'end')
+    dink_cnt_entry.insert(0, '0')
+    global dinks
+    dinks = 0
+    
+    speed_up_cnt_entry.delete(0, 'end')
+    speed_up_cnt_entry.insert(0, '0')
+    global speed_ups
+    speed_ups = 0
+    
+    shot_log_val = []
+    
+    additional_notes_entry.delete(0, 'end')
+    additional_notes_entry.insert(0, '')
 
 def entry_validation():
     rally_len = rally_length_entry.get()
@@ -239,14 +279,17 @@ def undo_last_entry():
     del lob_cnt[-1]
     del ernie_cnt[-1]
     del atp_cnt[-1]
+    del dink_cnt[-1]
+    del speed_up_cnt[-1]
+    del shot_log[-1]
     del third_player_side[-1]
     del third_shot_type[-1]
     del ending_type[-1]
     del ending_player[-1]
+    del user_notes[-1]
     
     # figure out who the server was
     serving_team_id = calc_server()
-    # serving_team.append(serving_team_id)
     
     # update values being displayed
     currScore.set(calc_score())
@@ -285,6 +328,19 @@ def undo_last_entry():
     lob_cnt_entry.insert(0, '0')
     global lobs 
     lobs = 0
+    
+    dink_cnt_entry.delete(0, 'end')
+    dink_cnt_entry.insert(0, '0')
+    global dinks
+    dinks = 0
+    
+    speed_up_cnt_entry.delete(0, 'end')
+    speed_up_cnt_entry.insert(0, '0')
+    global speed_ups
+    speed_ups = 0
+    
+    additional_notes_entry.delete(0, 'end')
+    additional_notes_entry.insert(0, '')
     
 def team_score_a_w1():
     # validate entries
@@ -599,25 +655,49 @@ def team_timeout_b():
     recent_events_str = get_recent_events()
     recentEvents.set(recent_events_str)
 
-def create_file():
-    # creating df
-    zipped = list(zip(tourn, tourn_yr, game_nbr, vod_url, player_a1, player_a2, player_b1, player_b2,\
+def create_files():
+    # creating dfs
+    zipped = list(zip(list(range(1,len(tourn) + 1)),tourn, tourn_yr, game_nbr, vod_url, player_a1, player_a2, player_b1, player_b2,\
                       pt_outcome, serving_team, rally_length, server_switch, returner_switch,\
-                      lob_cnt, ernie_cnt, atp_cnt))
+                      third_player_side, third_shot_type, ending_player, ending_type,\
+                      lob_cnt, ernie_cnt, atp_cnt, dink_cnt, speed_up_cnt))
         
-    df = pd.DataFrame(zipped, columns=['tourn_name', 'tourn_yr','game_nbr', 'vod_url', 'player_a1', 'player_a2', 'player_b1', 'player_b2',\
+    pts_df = pd.DataFrame(zipped, columns=['pt_nbr', 'tourn_name', 'tourn_yr','game_nbr', 'vod_url', 'player_a1', 'player_a2', 'player_b1', 'player_b2',\
                                        'pt_outcome', 'serving_team_id', 'rally_len', 'server_switch_ind', 'returner_switch_ind',\
-                                        'lob_cnt', 'ernie_cnt', 'atp_cnt'])
+                                        'third_shot_player_side', 'third_shot_type', 'ending_player', 'ending_type',\
+                                        'lob_cnt', 'ernie_cnt', 'atp_cnt', 'dink_cnt', 'speed_up_cnt'])
+        
+    # flatten out list of lists
+    pt_num = []
+    shot_val = []
+    shot_nbr = []
+    
+    for i in list(range(0, len(tourn))):
+        shot_nbr_val = 0
+        for z in list(range(0,len(shot_log[i]))):
+            shot_val.append(shot_log[i][z])
+            shot_nbr_val += 1
+            shot_nbr.append(shot_nbr_val)
+            pt_num.append(i + 1)
+
+    
+    zipped = list(zip(pt_num, shot_nbr, shot_val))
+    shots_df = pd.DataFrame(zipped, columns=['pt_nbr', 'shot_nbr', 'shot_type'])
+        
     
     # constructing filename
-    fn = tourn[0] + '_' + tourn_yr[0] + '_' + player_a1[0] + player_a2[0]\
-        + '_' + player_b1[0] + player_b2[0] + '_' + game_nbr[0] + '.csv'
+    pts_fn = tourn[0] + '_' + tourn_yr[0] + '_' + player_a1[0] + player_a2[0]\
+        + '_' + player_b1[0] + player_b2[0] + '_' + game_nbr[0] + ' Pt Log.csv'
+        
+    shots_fn = tourn[0] + '_' + tourn_yr[0] + '_' + player_a1[0] + player_a2[0]\
+        + '_' + player_b1[0] + player_b2[0] + '_' + game_nbr[0] + ' Shot Log.csv'
     
     # saving output
-    df.to_csv(fn, index=False)
+    pts_df.to_csv(pts_fn, index=False)
+    shots_df.to_csv(shots_fn, index=False)
     
     # print message
-    msg = 'File has been saved - please exit'
+    msg = 'Files have been saved - please exit'
     messagebox.showinfo('message', msg)
     
 def shot_increment(event):
@@ -626,7 +706,15 @@ def shot_increment(event):
     global shots 
     shots += 1
     rally_length_entry.insert(0, str(shots))
-    
+        
+    global shot_log_val
+    if shots == 1:
+        shot_log_val.append('SE')
+    elif shots == 2:
+        shot_log_val.append('R')
+    else:
+        shot_log_val.append('O')
+        
 def ernie_increment(event):
     rally_length_entry.delete(0, 'end')
     
@@ -639,6 +727,9 @@ def ernie_increment(event):
     global ernies
     ernies += 1 
     ernie_cnt_entry.insert(0, str(ernies))
+    
+    global shot_log_val
+    shot_log_val.append('E')
     
 def atp_increment(event):
     rally_length_entry.delete(0, 'end')
@@ -653,6 +744,9 @@ def atp_increment(event):
     atps += 1 
     atp_cnt_entry.insert(0, str(atps))
     
+    global shot_log_val
+    shot_log_val.append('A')
+    
 def lob_increment(event):
     rally_length_entry.delete(0, 'end')
     
@@ -666,11 +760,59 @@ def lob_increment(event):
     lobs += 1 
     lob_cnt_entry.insert(0, str(lobs))
     
+    global shot_log_val
+    shot_log_val.append('L')
+    
+def dink_increment(event):
+    rally_length_entry.delete(0, 'end')
+    
+    global shots
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    
+    dink_cnt_entry.delete(0, 'end')
+    
+    global dinks
+    dinks += 1 
+    dink_cnt_entry.insert(0, str(dinks))
+    
+    global shot_log_val
+    shot_log_val.append('D')
+    
+def speed_up_increment(event):
+    rally_length_entry.delete(0, 'end')
+    
+    global shots
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    
+    speed_up_cnt_entry.delete(0, 'end')
+    
+    global speed_ups
+    speed_ups += 1 
+    speed_up_cnt_entry.insert(0, str(speed_ups))
+    
+    global shot_log_val
+    shot_log_val.append('SP')
+    
 def record_server_switch(event):
     serverSwitch.set(1)
+    rally_length_entry.delete(0, 'end')
+    
+    global shots 
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    shot_log_val.append('SE')
 
 def record_returner_switch(event):
     returnerSwitch.set(1)
+    
+    rally_length_entry.delete(0, 'end')
+    
+    global shots 
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    shot_log_val.append('R')
     
 def record_left_third(event):
     leftplayerThird.set(1)
@@ -685,26 +827,64 @@ def record_third_drop(event):
     thirdDrive.set(0)
     thirdLob.set(0)
     
+    rally_length_entry.delete(0, 'end')
+    
+    global shots 
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    
 def record_third_drive(event):
     thirdDrop.set(0)
     thirdDrive.set(1)
     thirdLob.set(0)
+    
+    rally_length_entry.delete(0, 'end')
+    
+    global shots 
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    
     
 def record_third_lob(event):
     thirdDrop.set(0)
     thirdDrive.set(0)
     thirdLob.set(1)
     
-def begin_match():
-    team_a_pt_button_1.config(text='Pt Won: ' + team_a_player_1_entry.get() + ' Winner')
-    team_a_pt_button_2.config(text='Pt Won: ' + team_a_player_2_entry.get() + ' Winner')
-    team_b_pt_button_1.config(text='Pt Won: ' + team_b_player_1_entry.get() + ' Winner')
-    team_b_pt_button_2.config(text='Pt Won: ' + team_b_player_2_entry.get() + ' Winner')
+    rally_length_entry.delete(0, 'end')
     
-    team_a_pt_unf_button_1.config(text='Pt Won: ' + team_b_player_1_entry.get() + ' Unforced Error')
-    team_a_pt_unf_button_2.config(text='Pt Won: ' + team_b_player_2_entry.get() + ' Unforced Error')
-    team_b_pt_unf_button_1.config(text='Pt Won: ' + team_a_player_1_entry.get() + ' Unforced Error')
-    team_b_pt_unf_button_2.config(text='Pt Won: ' + team_a_player_2_entry.get() + ' Unforced Error')
+    global shots 
+    shots += 1
+    rally_length_entry.insert(0, str(shots))
+    
+    lob_cnt_entry.delete(0, 'end')
+    
+    global lobs
+    lobs += 1 
+    lob_cnt_entry.insert(0, str(lobs))
+    
+def begin_match():
+    player_a1 = team_a_player_1_entry.get()
+    player_a2 = team_a_player_2_entry.get()
+    player_b1 = team_b_player_1_entry.get()
+    player_b2 = team_b_player_2_entry.get()
+    
+    team_a_pt_button_1.config(text=player_a1 + ' Winner 👍')
+    team_a_pt_button_2.config(text=player_a2 + ' Winner 👍')
+    team_b_pt_button_1.config(text=player_b1 + ' Winner 👍')
+    team_b_pt_button_2.config(text=player_b2 + ' Winner 👍')
+    
+    team_a_pt_unf_button_1.config(text=team_b_player_1_entry.get() + ' Error 😦')
+    team_a_pt_unf_button_2.config(text=team_b_player_2_entry.get() + ' Error 😦')
+    team_b_pt_unf_button_1.config(text=team_a_player_1_entry.get() + ' Error 😦')
+    team_b_pt_unf_button_2.config(text=team_a_player_2_entry.get() + ' Error 😦')
+    
+    player_a1_last = player_a1.split(' ')[1:][0]
+    player_a2_last = player_a2.split(' ')[1:][0]
+    player_b1_last = player_b1.split(' ')[1:][0]
+    player_b2_last = player_b2.split(' ')[1:][0]
+
+    team_a_timeout_button.config(text=player_a1_last + '/' + player_a2_last + ' Timeout')
+    team_b_timeout_button.config(text=player_b1_last + '/' + player_b2_last + ' Timeout')
 
 def reset_cnts():
     rally_length_entry.delete(0, 'end')
@@ -730,6 +910,42 @@ def reset_cnts():
     global lobs
     lobs = 0
     lob_cnt_entry.insert(0, str(lobs))
+    
+    global dinks
+    dinks = 0
+    dink_cnt_entry.insert(0, str(dinks))
+    
+    global speed_ups
+    speed_ups = 0
+    speed_up_cnt_entry.insert(0, str(speed_ups))
+    
+def color_select_a1():
+    color = colorchooser.askcolor(title ="Choose color")
+    color = color[1]
+    team_a_player_1_color.configure(bg = color)
+    team_a_pt_button_1.configure(fg = color)
+    team_a_pt_unf_button_1.configure(fg = color)
+    
+def color_select_a2():
+    color = colorchooser.askcolor(title ="Choose color")
+    color = color[1]
+    team_a_player_2_color.configure(bg = color)
+    team_a_pt_button_2.configure(fg = color)
+    team_a_pt_unf_button_2.configure(fg = color)
+    
+def color_select_b1():
+    color = colorchooser.askcolor(title ="Choose color")
+    color = color[1]
+    team_b_player_1_color.configure(bg = color)
+    team_b_pt_button_1.configure(fg = color)
+    team_b_pt_unf_button_1.configure(fg = color)
+
+def color_select_b2():
+    color = colorchooser.askcolor(title ="Choose color")
+    color = color[1]
+    team_b_player_2_color.configure(bg = color)
+    team_b_pt_button_2.configure(fg = color)
+    team_b_pt_unf_button_2.configure(fg = color)
 
 #%% --- Interface ---    
 # iniate        
@@ -762,6 +978,12 @@ thirdDrive.set(0)
 thirdLob = IntVar()
 thirdLob.set(0)
 
+farsideSwitch_A = IntVar()
+farsideSwitch_A.set(0)
+
+farsideSwitch_B = IntVar()
+farsideSwitch_B.set(0)
+
 global shots
 shots = 0  
 
@@ -773,6 +995,15 @@ atps = 0
 
 global lobs
 lobs = 0
+
+global dinks
+dinks = 0
+
+global speed_ups
+speed_ups = 0
+
+global shot_log_val
+shot_log_val = []
 
 # header text
 root.title("Pickle Data Entry Tool")
@@ -810,7 +1041,7 @@ vod_url_entry = Entry(root)
 vod_url_entry.grid(row=5, column=2)
 
 # team A entry
-team_a_label = Label(root, text="Enter Team A (Initial Server)", font='Arial 9 bold')
+team_a_label = Label(root, text="Enter Team A", font='Arial 9 bold')
 team_a_label.grid(row=6, column=2)
 
 team_a_right_player_label = Label(root, text='Right Side Player')
@@ -819,11 +1050,20 @@ team_a_right_player_label.grid(row=7, column=1)
 team_a_player_1_entry = Entry(root)
 team_a_player_1_entry.grid(row=7, column=2)
 
+team_a_player_1_color = Button(root, text='  ', bg='#BACDB0', command = color_select_a1)
+team_a_player_1_color.grid(row=7, column=3, sticky='W')
+
 team_a_left_player_label = Label(root, text='Left Side Player')
 team_a_left_player_label.grid(row=8, column=1)
 
 team_a_player_2_entry = Entry(root)
 team_a_player_2_entry.grid(row=8, column=2)
+
+team_a_player_2_color = Button(root, text='  ', bg='#729B79', command = color_select_a2)
+team_a_player_2_color.grid(row=8, column=3, sticky='W')
+
+far_side_indicator_A = Checkbutton(root, text='Far Side Team', variable=farsideSwitch_A)
+far_side_indicator_A.grid(row=6, column=3, sticky='W')
 
 # team B entry
 team_b_label = Label(root, text="Enter Team B", font='Arial 9 bold')
@@ -835,11 +1075,20 @@ team_b_right_player_label.grid(row=10, column=1)
 team_b_player_1_entry = Entry(root)
 team_b_player_1_entry.grid(row=10, column=2)
 
+team_b_player_1_color = Button(root, text='  ', bg='#475B63', command = color_select_b1)
+team_b_player_1_color.grid(row=10, column=3, sticky='W')
+
 team_b_left_player_label = Label(root, text='Left Side Player')
 team_b_left_player_label.grid(row=11, column=1)
 
 team_b_player_2_entry = Entry(root)
 team_b_player_2_entry.grid(row=11, column=2)
+
+team_b_player_2_color = Button(root, text='  ', bg='#2E2C2F', command = color_select_b2)
+team_b_player_2_color.grid(row=11, column=3, sticky='W')
+
+far_side_indicator_B = Checkbutton(root, text='Far Side Team', variable=farsideSwitch_B)
+far_side_indicator_B.grid(row=9, column=3, sticky='W')
 
 begin_match_button = Button(root, text='Begin Match', command=begin_match)
 begin_match_button.grid(row=12, column=1, columnspan=2, pady=(5,0))
@@ -887,7 +1136,7 @@ returner_switch_yes_button.grid(row=14, column=2, sticky='W')
 left_player_third_box = Checkbutton(root, text='Left Player hit the Third (7)', variable=leftplayerThird)
 left_player_third_box.grid(row=15, column=1, sticky='W')
 
-right_player_third_box = Checkbutton(root, text='Right Player hit the Third (8)', variable=rightplayerThird)
+right_player_third_box = Checkbutton(root, text='Right Player hit the Third (9)', variable=rightplayerThird)
 right_player_third_box.grid(row=15, column=2, sticky='W')
 
 third_drop_box = Checkbutton(root, text='Third Shot Drop (4)', variable=thirdDrop)
@@ -900,11 +1149,11 @@ third_lob_box = Checkbutton(root, text='Third Shot Lob (6)', variable=thirdLob)
 third_lob_box.grid(row=16, column=3, sticky='W')
 
 rally_len_label = Label(root, text='Rally Length (↓)')
-rally_len_label.grid(row=19, column=1)
+rally_len_label.grid(row=19, column=3)
 
 rally_length_entry = Entry(root)
 rally_length_entry.insert(0, '0')
-rally_length_entry.grid(row=20, column=1)
+rally_length_entry.grid(row=20, column=3)
 
 lob_cnt_label = Label(root, text='Lob Count (↑)')
 lob_cnt_label.grid(row=17, column=1)
@@ -927,61 +1176,83 @@ atp_cnt_entry = Entry(root)
 atp_cnt_entry.insert(0, '0')
 atp_cnt_entry.grid(row=18, column=3)
 
+dink_cnt_label = Label(root, text='Dink Count (0)')
+dink_cnt_label.grid(row=19, column=1)
+
+dink_cnt_entry = Entry(root)
+dink_cnt_entry.insert(0, '0')
+dink_cnt_entry.grid(row=20, column=1)
+
+speed_up_cnt_label = Label(root, text='Speed Up Count (.)')
+speed_up_cnt_label.grid(row=19, column=2)
+
+speed_up_cnt_entry = Entry(root)
+speed_up_cnt_entry.insert(0, '0')
+speed_up_cnt_entry.grid(row=20, column=2)
+
 # reset count values
 reset_cnts_button = Button(root, text='Reset Count Values', command=reset_cnts)
-reset_cnts_button.grid(row=20, column=2)
+reset_cnts_button.grid(row=22, column=3)
+
+# additional user notes
+additional_notes_label = Label(root, text='Additional Notes')
+additional_notes_label.grid(row=21, column=1)
+
+additional_notes_entry = Entry(root)
+additional_notes_entry.insert(0, '')
+additional_notes_entry.grid(row=22, column=1)
 
 # points scored
-team_a_pt_label = Label(root, text="Team A", font='Arial 9 bold')
-team_a_pt_label.grid(row=21, column=1, pady=(5,0))
+team_a_pt_label = Label(root, text="Team A: Pt Won", font='Arial 9 bold')
+team_a_pt_label.grid(row=23, column=1, pady=(5,0))
 
-team_b_pt_label = Label(root, text="Team B", font='Arial 9 bold')
-team_b_pt_label.grid(row=21, column=3, pady=(5,0))
+team_b_pt_label = Label(root, text="Team B: Pt Won", font='Arial 9 bold')
+team_b_pt_label.grid(row=23, column=3, pady=(5,0))
 
-team_a_pt_button_1 = Button(root, text='Pt Won: [Player A1] Winner', command=team_score_a_w1)
-team_a_pt_button_1.grid(row=22, column=1, sticky='W')
+team_a_pt_button_1 = Button(root, text='[Player A1] Winner👍', command=team_score_a_w1)
+team_a_pt_button_1.grid(row=24, column=1, sticky='W')
 
-team_a_pt_button_2 = Button(root, text='Pt Won: [Player A2] Winner', command=team_score_a_w2)
-team_a_pt_button_2.grid(row=23, column=1, sticky='W')
+team_a_pt_button_2 = Button(root, text='[Player A2] Winner👍', command=team_score_a_w2)
+team_a_pt_button_2.grid(row=25, column=1, sticky='W')
 
-team_a_pt_unf_button_1 = Button(root, text='Pt Won: [Player B1] Unf. Error', command=team_score_a_u1)
-team_a_pt_unf_button_1.grid(row=24, column=1, sticky='W')
+team_a_pt_unf_button_1 = Button(root, text='[Player B1] Error 😦 ', command=team_score_a_u1)
+team_a_pt_unf_button_1.grid(row=26, column=1, sticky='W')
 
-team_a_pt_unf_button_2 = Button(root, text='Pt Won: [Player B2] Unf. Error', command=team_score_a_u2)
-team_a_pt_unf_button_2.grid(row=25, column=1, sticky='W')
+team_a_pt_unf_button_2 = Button(root, text='[Player B2] Error 😦', command=team_score_a_u2)
+team_a_pt_unf_button_2.grid(row=27, column=1, sticky='W')
 
-team_a_pt_other_button = Button(root, text='Pt Won: Other', command=team_score_a_o)
-team_a_pt_other_button.grid(row=26, column=1, sticky='W')
+team_a_pt_other_button = Button(root, text='Other', command=team_score_a_o)
+team_a_pt_other_button.grid(row=28, column=1, sticky='W')
 
-team_b_pt_button_1 = Button(root, text='Pt Won: [Player B1] Winner', command=team_score_b_w1)
-team_b_pt_button_1.grid(row=22, column=3, sticky='W')
+team_b_pt_button_1 = Button(root, text='[Player B1] Winner 👍', command=team_score_b_w1)
+team_b_pt_button_1.grid(row=24, column=3, sticky='W')
 
-team_b_pt_button_2 = Button(root, text='Pt Won: [Player B2] Winner', command=team_score_b_w2)
-team_b_pt_button_2.grid(row=23, column=3, sticky='W')
+team_b_pt_button_2 = Button(root, text='[Player B2] Winner 👍', command=team_score_b_w2)
+team_b_pt_button_2.grid(row=25, column=3, sticky='W')
 
-team_b_pt_unf_button_1 = Button(root, text='Pt Won: [Player A1] Unf. Error', command=team_score_b_u1)
-team_b_pt_unf_button_1.grid(row=24, column=3, sticky='W')
+team_b_pt_unf_button_1 = Button(root, text='[Player A1] Error 😦', command=team_score_b_u1)
+team_b_pt_unf_button_1.grid(row=26, column=3, sticky='W')
 
-team_b_pt_unf_button_2 = Button(root, text='Pt Won: [Player A2] Unf. Error', command=team_score_b_u2)
-team_b_pt_unf_button_2.grid(row=25, column=3, sticky='W')
+team_b_pt_unf_button_2 = Button(root, text='[Player A2] Error 😦', command=team_score_b_u2)
+team_b_pt_unf_button_2.grid(row=27, column=3, sticky='W')
 
-team_b_pt_other_button = Button(root, text='Pt Won: Other', command=team_score_b_o)
-team_b_pt_other_button.grid(row=26, column=3, sticky='W')
+team_b_pt_other_button = Button(root, text='Other', command=team_score_b_o)
+team_b_pt_other_button.grid(row=28, column=3, sticky='W')
 
 # timout call
-team_a_timeout_button = Button(root, text='Timeout', command=team_timeout_a)
-team_a_timeout_button.grid(row=27, column=1, sticky='W')
+team_a_timeout_button = Button(root, text='Team A Timeout', command=team_timeout_a)
+team_a_timeout_button.grid(row=29, column=1, sticky='W')
 
-team_b_timeout_button = Button(root, text='Timeout', command=team_timeout_b)
-team_b_timeout_button.grid(row=27, column=3, sticky='W')
+team_b_timeout_button = Button(root, text='Team B Timeout', command=team_timeout_b)
+team_b_timeout_button.grid(row=29, column=3, sticky='W')
 
 # undo
 undo_button = Button(root, text='Undo last entry', command=undo_last_entry)
-undo_button.grid(row=28, column=1, pady=(20, 5))
+undo_button.grid(row=30, column=1, pady=(20, 5))
 
 # ending the game (but not the match)
-end_game_button = Button(root, text='Submit - Game Complete', command=create_file) # will need to update
-end_game_button.grid(row=28, column=3, pady=(20,5))
+end_game_button = Button(root, text='Submit - Game Complete', command=create_files) # will need to update
+end_game_button.grid(row=30, column=3, pady=(20,5))
 
 # information box
 info_title_label = Label(root, text='Instructions & Tips', font='Arial 11 bold')
@@ -991,24 +1262,28 @@ desc_label = Label(root, text='1) Enter Match Information\n' + \
                 '• Team A MUST be the team serving first\n \n' + \
                 '2) Hit "Begin Match" and begin recording points\n' + \
                 '• Use hotheys to quickly input data (e.g. record a lob with the Up Arrow)\n' + \
+                '• Recording that Serving and/or Receiving Team Switched also logs a shot\n' + \
                 '• Occasionally validate score against video stream (if possible)\n' + \
                 '• Do NOT enter points that are replayed\n' + \
                 '• Make a mistake? No problem - use the "Undo" feature\n' + \
-                '• [Placeholder for defining an unforced error]\n\n' + \
+                '• [Placeholder for defining an error]\n' + \
+                '• [Placeholder for defining a winner]\n\n' + \
                 '3) Upon completion, hit "Submit - Game Complete"\n' + \
                 '• Ensure file has been saved before closing window',
                    borderwidth = 3, relief="ridge", justify='left')
-desc_label.grid(row=2, column=4, columnspan=3, rowspan=3)
+desc_label.grid(row=2, column=4, columnspan=3, rowspan=10)
 
 # click inputs
 root.bind('<Down>', shot_increment)
 root.bind('<Left>', ernie_increment)
 root.bind('<Right>', atp_increment)
 root.bind('<Up>', lob_increment)
+root.bind('0', dink_increment)
+root.bind('.', speed_up_increment)
 root.bind('<F1>', record_server_switch)
 root.bind('<F2>', record_returner_switch)
 root.bind('7', record_left_third)
-root.bind('8', record_right_third)
+root.bind('9', record_right_third)
 root.bind('4', record_third_drop)
 root.bind('5', record_third_drive)
 root.bind('6', record_third_lob)
