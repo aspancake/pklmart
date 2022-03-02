@@ -8,7 +8,6 @@ Created on Mon Jan 31 22:19:37 2022
 from tkinter import Tk, Label, Button, Entry, StringVar, IntVar, messagebox, Checkbutton, colorchooser
 from os import chdir
 import pandas as pd
-import datetime
 
 # directories
 chdir('C:/Users/ASpan/OneDrive/Documents/Pickle/Data Entry UI')
@@ -52,9 +51,7 @@ def calc_score():
     team_b_score = 0
     # server_num = 2 server number set globally
     global server_num
-    
-    print(datetime.datetime.now())
-    
+        
     for i in list(range(len(pt_outcome))):
         if pt_outcome[i] not in ['A', 'B']:
             ''
@@ -155,15 +152,16 @@ def append_constants():
     right_player_third_val = rightplayerThird.get()
     far_side_ind_A_val = farsideSwitch_A.get()
     far_side_ind_B_val = farsideSwitch_B.get()
-
-    if left_player_third_val == 1 and serving_team_id == 'A' and far_side_ind_A_val == 0:
-        third_side_val = 'L'
-    elif left_player_third_val == 1 and serving_team_id == 'A' and far_side_ind_A_val == 1:
-        third_side_val = 'R'
-    elif right_player_third_val == 1 and serving_team_id == 'B' and far_side_ind_B_val == 0:
-        third_side_val = 'R'
-    elif right_player_third_val == 1 and serving_team_id == 'B' and far_side_ind_B_val == 1:
-        third_side_val = 'L'
+    
+    # my logic is bad
+    if left_player_third_val == 1 and serving_team_id == 'A':
+        third_side_val = ('L' if far_side_ind_A_val == 0 else 'R')
+    elif right_player_third_val == 1 and serving_team_id == 'A':
+        third_side_val = ('R' if far_side_ind_A_val == 0 else 'L')
+    elif left_player_third_val == 1 and serving_team_id == 'B':
+        third_side_val = ('L' if far_side_ind_B_val == 0 else 'R')
+    elif right_player_third_val == 1 and serving_team_id == 'B':
+        third_side_val = ('R' if far_side_ind_B_val == 0 else 'L')
     else:
         third_side_val = 'N/A'
     third_player_side.append(third_side_val)
@@ -832,6 +830,7 @@ def record_third_drop(event):
     global shots 
     shots += 1
     rally_length_entry.insert(0, str(shots))
+    shot_log_val.append('tsDrp')
     
 def record_third_drive(event):
     thirdDrop.set(0)
@@ -843,6 +842,7 @@ def record_third_drive(event):
     global shots 
     shots += 1
     rally_length_entry.insert(0, str(shots))
+    shot_log_val.append('tsDrv')
     
     
 def record_third_lob(event):
@@ -861,6 +861,7 @@ def record_third_lob(event):
     global lobs
     lobs += 1 
     lob_cnt_entry.insert(0, str(lobs))
+    shot_log_val.append('tsL')
     
 def begin_match():
     player_a1 = team_a_player_1_entry.get()
@@ -911,13 +912,21 @@ def reset_cnts():
     lobs = 0
     lob_cnt_entry.insert(0, str(lobs))
     
+    dink_cnt_entry.delete(0, 'end')
+    
     global dinks
     dinks = 0
     dink_cnt_entry.insert(0, str(dinks))
     
+    speed_up_cnt_entry.delete(0, 'end')
+    
     global speed_ups
     speed_ups = 0
     speed_up_cnt_entry.insert(0, str(speed_ups))
+    
+    # reset the shot log
+    global shot_log_val
+    shot_log_val = []
     
 def color_select_a1():
     color = colorchooser.askcolor(title ="Choose color")
@@ -1095,10 +1104,10 @@ begin_match_button.grid(row=12, column=1, columnspan=2, pady=(5,0))
 
 # server
 team_serving_label = Label(root, text="Serving Team", font='Arial 11 bold')
-team_serving_label.grid(row=13, column=6, pady=(20, 0))
+team_serving_label.grid(row=13, column=2, pady=(20, 0))
 
 team_serving_display = Label(root, textvariable=currServer, font='Arial 11')
-team_serving_display.grid(row=14, column=6)
+team_serving_display.grid(row=14, column=2)
 
 # log display
 recent_entries_title_label = Label(root, text='Log', font='Arial 11 bold')
@@ -1109,150 +1118,150 @@ recent_entries_label.grid(row=16, column=5, columnspan=2, rowspan=9, padx=(30,5)
 
 # display score
 score_label = Label(root, text='Current Score', font='Arial 11 bold')
-score_label.grid(row=13, column=5, columnspan=1, padx=(30,5), pady=(20, 0))
+score_label.grid(row=13, column=1, columnspan=1, padx=(30,5), pady=(20, 0))
 
 # score_desc_label = Label(root, text='(Team A:Team B:Server #)', font='Arial 11')
 # score_desc_label.grid(row=2, column=4, columnspan=2)
 
 score_display = Label(root, textvariable=currScore, font='Arial 11')
-score_display.grid(row=14, column=5, columnspan=1, padx=(30,5))
+score_display.grid(row=14, column=1, columnspan=1, padx=(30,5))
 
 # area to enter point specific information
 entry_label = Label(root, text='Enter Values', font='Arial 11 bold')
-entry_label.grid(row=13, column=1, columnspan=3, pady=(20, 5))
+entry_label.grid(row=15, column=1, columnspan=3, pady=(20, 5))
 
 # server_switch_label = Label(root, text='Serving Team Switch?')
 # server_switch_label.grid(row=13, column=1)
 
 server_switch_yes_button = Checkbutton(root, text='Serving Team Switch (F1)', variable=serverSwitch)
-server_switch_yes_button.grid(row=14, column=1, sticky='W')
+server_switch_yes_button.grid(row=16, column=1, sticky='W')
 
 # returner_switch_label = Label(root, text='Return Team Switch?')
 # returner_switch_label.grid(row=13, column=2)
 
 returner_switch_yes_button = Checkbutton(root, text='Returning Team Switch (F2)', variable=returnerSwitch) 
-returner_switch_yes_button.grid(row=14, column=2, sticky='W')
+returner_switch_yes_button.grid(row=16, column=2, sticky='W')
 
 left_player_third_box = Checkbutton(root, text='Left Player hit the Third (7)', variable=leftplayerThird)
-left_player_third_box.grid(row=15, column=1, sticky='W')
+left_player_third_box.grid(row=17, column=1, sticky='W')
 
 right_player_third_box = Checkbutton(root, text='Right Player hit the Third (9)', variable=rightplayerThird)
-right_player_third_box.grid(row=15, column=2, sticky='W')
+right_player_third_box.grid(row=17, column=2, sticky='W')
 
 third_drop_box = Checkbutton(root, text='Third Shot Drop (4)', variable=thirdDrop)
-third_drop_box.grid(row=16, column=1, sticky='W')
+third_drop_box.grid(row=18, column=1, sticky='W')
 
 third_drive_box = Checkbutton(root, text='Third Shot Drive (5)', variable=thirdDrive)
-third_drive_box.grid(row=16, column=2, sticky='W')
+third_drive_box.grid(row=18, column=2, sticky='W')
 
 third_lob_box = Checkbutton(root, text='Third Shot Lob (6)', variable=thirdLob)
-third_lob_box.grid(row=16, column=3, sticky='W')
+third_lob_box.grid(row=18, column=3, sticky='W')
 
-rally_len_label = Label(root, text='Rally Length (↓)')
-rally_len_label.grid(row=19, column=3)
+rally_len_label = Label(root, text='Rally Length (s)')
+rally_len_label.grid(row=21, column=3)
 
 rally_length_entry = Entry(root)
 rally_length_entry.insert(0, '0')
-rally_length_entry.grid(row=20, column=3)
+rally_length_entry.grid(row=22, column=3)
 
 lob_cnt_label = Label(root, text='Lob Count (↑)')
-lob_cnt_label.grid(row=17, column=1)
+lob_cnt_label.grid(row=19, column=1)
 
 lob_cnt_entry = Entry(root)
 lob_cnt_entry.insert(0, '0')
-lob_cnt_entry.grid(row=18, column=1)
+lob_cnt_entry.grid(row=20, column=1)
 
 ernie_cnt_label = Label(root, text='Ernie Count (←)')
-ernie_cnt_label.grid(row=17, column=2)
+ernie_cnt_label.grid(row=19, column=2)
 
 ernie_cnt_entry = Entry(root)
 ernie_cnt_entry.insert(0, '0')
-ernie_cnt_entry.grid(row=18, column=2)
+ernie_cnt_entry.grid(row=20, column=2)
 
 atp_cnt_label = Label(root, text='ATP Count (→)')
-atp_cnt_label.grid(row=17, column=3)
+atp_cnt_label.grid(row=19, column=3)
 
 atp_cnt_entry = Entry(root)
 atp_cnt_entry.insert(0, '0')
-atp_cnt_entry.grid(row=18, column=3)
+atp_cnt_entry.grid(row=20, column=3)
 
-dink_cnt_label = Label(root, text='Dink Count (0)')
-dink_cnt_label.grid(row=19, column=1)
+dink_cnt_label = Label(root, text='Dink Count (d)')
+dink_cnt_label.grid(row=21, column=1)
 
 dink_cnt_entry = Entry(root)
 dink_cnt_entry.insert(0, '0')
-dink_cnt_entry.grid(row=20, column=1)
+dink_cnt_entry.grid(row=22, column=1)
 
-speed_up_cnt_label = Label(root, text='Speed Up Count (.)')
-speed_up_cnt_label.grid(row=19, column=2)
+speed_up_cnt_label = Label(root, text='Speed Up Count (↓)')
+speed_up_cnt_label.grid(row=21, column=2)
 
 speed_up_cnt_entry = Entry(root)
 speed_up_cnt_entry.insert(0, '0')
-speed_up_cnt_entry.grid(row=20, column=2)
+speed_up_cnt_entry.grid(row=22, column=2)
 
 # reset count values
 reset_cnts_button = Button(root, text='Reset Count Values', command=reset_cnts)
-reset_cnts_button.grid(row=22, column=3)
+reset_cnts_button.grid(row=24, column=3)
 
 # additional user notes
 additional_notes_label = Label(root, text='Additional Notes')
-additional_notes_label.grid(row=21, column=1)
+additional_notes_label.grid(row=23, column=1)
 
 additional_notes_entry = Entry(root)
 additional_notes_entry.insert(0, '')
-additional_notes_entry.grid(row=22, column=1)
+additional_notes_entry.grid(row=24, column=1)
 
 # points scored
 team_a_pt_label = Label(root, text="Team A: Pt Won", font='Arial 9 bold')
-team_a_pt_label.grid(row=23, column=1, pady=(5,0))
+team_a_pt_label.grid(row=25, column=1, pady=(5,0))
 
 team_b_pt_label = Label(root, text="Team B: Pt Won", font='Arial 9 bold')
-team_b_pt_label.grid(row=23, column=3, pady=(5,0))
+team_b_pt_label.grid(row=25, column=3, pady=(5,0))
 
 team_a_pt_button_1 = Button(root, text='[Player A1] Winner👍', command=team_score_a_w1)
-team_a_pt_button_1.grid(row=24, column=1, sticky='W')
+team_a_pt_button_1.grid(row=26, column=1, sticky='W')
 
 team_a_pt_button_2 = Button(root, text='[Player A2] Winner👍', command=team_score_a_w2)
-team_a_pt_button_2.grid(row=25, column=1, sticky='W')
+team_a_pt_button_2.grid(row=27, column=1, sticky='W')
 
 team_a_pt_unf_button_1 = Button(root, text='[Player B1] Error 😦 ', command=team_score_a_u1)
-team_a_pt_unf_button_1.grid(row=26, column=1, sticky='W')
+team_a_pt_unf_button_1.grid(row=28, column=1, sticky='W')
 
 team_a_pt_unf_button_2 = Button(root, text='[Player B2] Error 😦', command=team_score_a_u2)
-team_a_pt_unf_button_2.grid(row=27, column=1, sticky='W')
+team_a_pt_unf_button_2.grid(row=29, column=1, sticky='W')
 
 team_a_pt_other_button = Button(root, text='Other', command=team_score_a_o)
-team_a_pt_other_button.grid(row=28, column=1, sticky='W')
+team_a_pt_other_button.grid(row=30, column=1, sticky='W')
 
 team_b_pt_button_1 = Button(root, text='[Player B1] Winner 👍', command=team_score_b_w1)
-team_b_pt_button_1.grid(row=24, column=3, sticky='W')
+team_b_pt_button_1.grid(row=26, column=3, sticky='W')
 
 team_b_pt_button_2 = Button(root, text='[Player B2] Winner 👍', command=team_score_b_w2)
-team_b_pt_button_2.grid(row=25, column=3, sticky='W')
+team_b_pt_button_2.grid(row=27, column=3, sticky='W')
 
 team_b_pt_unf_button_1 = Button(root, text='[Player A1] Error 😦', command=team_score_b_u1)
-team_b_pt_unf_button_1.grid(row=26, column=3, sticky='W')
+team_b_pt_unf_button_1.grid(row=28, column=3, sticky='W')
 
 team_b_pt_unf_button_2 = Button(root, text='[Player A2] Error 😦', command=team_score_b_u2)
-team_b_pt_unf_button_2.grid(row=27, column=3, sticky='W')
+team_b_pt_unf_button_2.grid(row=29, column=3, sticky='W')
 
 team_b_pt_other_button = Button(root, text='Other', command=team_score_b_o)
-team_b_pt_other_button.grid(row=28, column=3, sticky='W')
+team_b_pt_other_button.grid(row=30, column=3, sticky='W')
 
 # timout call
 team_a_timeout_button = Button(root, text='Team A Timeout', command=team_timeout_a)
-team_a_timeout_button.grid(row=29, column=1, sticky='W')
+team_a_timeout_button.grid(row=31, column=1, sticky='W')
 
 team_b_timeout_button = Button(root, text='Team B Timeout', command=team_timeout_b)
-team_b_timeout_button.grid(row=29, column=3, sticky='W')
+team_b_timeout_button.grid(row=31, column=3, sticky='W')
 
 # undo
 undo_button = Button(root, text='Undo last entry', command=undo_last_entry)
-undo_button.grid(row=30, column=1, pady=(20, 5))
+undo_button.grid(row=32, column=1, pady=(20, 5))
 
 # ending the game (but not the match)
 end_game_button = Button(root, text='Submit - Game Complete', command=create_files) # will need to update
-end_game_button.grid(row=30, column=3, pady=(20,5))
+end_game_button.grid(row=32, column=3, pady=(20,5))
 
 # information box
 info_title_label = Label(root, text='Instructions & Tips', font='Arial 11 bold')
@@ -1274,12 +1283,12 @@ desc_label = Label(root, text='1) Enter Match Information\n' + \
 desc_label.grid(row=2, column=4, columnspan=3, rowspan=10)
 
 # click inputs
-root.bind('<Down>', shot_increment)
+root.bind('s', shot_increment)
 root.bind('<Left>', ernie_increment)
 root.bind('<Right>', atp_increment)
 root.bind('<Up>', lob_increment)
-root.bind('0', dink_increment)
-root.bind('.', speed_up_increment)
+root.bind('d', dink_increment)
+root.bind('Down', speed_up_increment)
 root.bind('<F1>', record_server_switch)
 root.bind('<F2>', record_returner_switch)
 root.bind('7', record_left_third)
