@@ -15,6 +15,7 @@ chdir('C:/Users/ASpan/OneDrive/Documents/Pickle/Data Entry UI')
 # baselining lists to append to
 tourn = []
 tourn_yr = []
+consol_ind = []
 game_nbr = []
 player_a1 = []
 player_a2 = []
@@ -98,6 +99,9 @@ def append_constants():
     
     tourn_yr_val = tourney_yr_entry.get()
     tourn_yr.append(tourn_yr_val)
+    
+    consol_ind_val = consolInd.get()
+    consol_ind.append(consol_ind_val)
     
     game_nbr_val = game_nbr_entry.get()
     game_nbr.append(game_nbr_val)
@@ -263,6 +267,7 @@ def undo_last_entry():
     # remove last entry of all lists
     del tourn[-1]
     del tourn_yr[-1]
+    del consol_ind[-1]
     del game_nbr[-1]
     del vod_url[-1]
     del player_a1[-1]
@@ -655,15 +660,15 @@ def team_timeout_b():
 
 def create_files():
     # creating dfs
-    zipped = list(zip(list(range(1,len(tourn) + 1)),tourn, tourn_yr, game_nbr, vod_url, player_a1, player_a2, player_b1, player_b2,\
+    zipped = list(zip(list(range(1,len(tourn) + 1)),tourn, tourn_yr, consol_ind, game_nbr, vod_url, player_a1, player_a2, player_b1, player_b2,\
                       pt_outcome, serving_team, rally_length, server_switch, returner_switch,\
                       third_player_side, third_shot_type, ending_player, ending_type,\
-                      lob_cnt, ernie_cnt, atp_cnt, dink_cnt, speed_up_cnt))
+                      lob_cnt, ernie_cnt, atp_cnt, dink_cnt, speed_up_cnt, user_notes))
         
-    pts_df = pd.DataFrame(zipped, columns=['pt_nbr', 'tourn_name', 'tourn_yr','game_nbr', 'vod_url', 'player_a1', 'player_a2', 'player_b1', 'player_b2',\
+    pts_df = pd.DataFrame(zipped, columns=['pt_nbr', 'tourn_name', 'tourn_yr','consol_ind', 'game_nbr', 'vod_url', 'player_a1', 'player_a2', 'player_b1', 'player_b2',\
                                        'pt_outcome', 'serving_team_id', 'rally_len', 'server_switch_ind', 'returner_switch_ind',\
                                         'third_shot_player_side', 'third_shot_type', 'ending_player', 'ending_type',\
-                                        'lob_cnt', 'ernie_cnt', 'atp_cnt', 'dink_cnt', 'speed_up_cnt'])
+                                        'lob_cnt', 'ernie_cnt', 'atp_cnt', 'dink_cnt', 'speed_up_cnt', 'user_notes'])
         
     # flatten out list of lists
     pt_num = []
@@ -961,6 +966,9 @@ def color_select_b2():
 root = Tk()
 
 # vars
+consolInd = IntVar()
+consolInd.set(0)
+
 currScore = StringVar()
 currScore.set('0:0:2')
 currServer = StringVar()
@@ -1034,6 +1042,10 @@ tourney_yr_label.grid(row=3, column=1)
 
 tourney_yr_entry = Entry(root)
 tourney_yr_entry.grid(row=3, column=2)
+
+# consolidation match indicator
+consol_ind_button = Checkbutton(root, text='Consolation Match', variable=consolInd) 
+consol_ind_button.grid(row=2, column=3, sticky='W')
 
 # game number
 game_nbr_label = Label(root, text='Game #')
