@@ -15,8 +15,8 @@ import os
 
 # configurables
 log_wd = 'C:/Users/ASpan/OneDrive/Documents/Pickle/Data Entry UI'
-pt_log_fn = 'Foot Solutions PP Arizona Grand Slam_2022_Tyson McguffinJay Devilliers_Collin JohnsBen Johns_1 Pt Log.csv'
-shot_log_fn = 'Foot Solutions PP Arizona Grand Slam_2022_Tyson McguffinJay Devilliers_Collin JohnsBen Johns_1 Shot Log.csv'
+pt_log_fn = 'PPA Ororo Indoor National Championships_2022_Catherine ParenteauJesse Irvine_AnnaLeigh WatersLeigh Waters_3 Pt Log.csv'
+shot_log_fn = 'PPA Ororo Indoor National Championships_2022_Catherine ParenteauJesse Irvine_AnnaLeigh WatersLeigh Waters_3 Shot Log.csv'
 
 # read in point and shot log
 os.chdir(log_wd)
@@ -336,7 +336,7 @@ for player in [player_a1, player_a2, player_b1, player_b2]:
 # doing calculations for fields that can't be directly copied over
 # point_id -- making a list
 max_point_id = pd.read_sql_query('''
-                       select coalesce(max(substr(point_id,2,16)::integer), 0) + 1
+                       select coalesce(max(substr(point_id,3)::integer), 0) + 1
                        from pklm_prd.point
                        ''', con=conn).iat[0, 0]
 
@@ -359,7 +359,7 @@ def identify_rtrn_team_id(row):
        return team_a_id  
    
 pt_log_df['srv_team_id'] = pt_log_df.apply (lambda row: identify_srv_team_id(row), axis=1)
-pt_log_df['rtrn_team_id'] = pt_log_df.apply (lambda row: identify_srv_team_id(row), axis=1)
+pt_log_df['rtrn_team_id'] = pt_log_df.apply (lambda row: identify_rtrn_team_id(row), axis=1)
                             
 
 # srv_player_id/rtrn_player_id
@@ -521,21 +521,21 @@ pt_log_df = append_position_fields(pt_log_df)
 # ts_player_id (this will need special logic)
 def identify_tsd_player_id(row):
    if row['serving_team_id'] == 'A':
-      if row['srv_flipped_ind'] == 'N' and row['server_switch_ind'] == 'N':
+      if row['srv_flipped_ind'] == 'N' and row['server_switch_ind'] == 0:
           if row['third_shot_player_side'] == 'R':
               return player_a1_id
           if row['third_shot_player_side'] == 'L':
               return player_a2_id
           else:
               return 'N/A'
-      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 'N':
+      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 0:
           if row['third_shot_player_side'] == 'R':
              return player_a2_id
           if row['third_shot_player_side'] == 'L':
              return player_a1_id
           else:
              return 'N/A'
-      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 'Y':
+      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 1:
           if row['third_shot_player_side'] == 'R':
              return player_a1_id
           if row['third_shot_player_side'] == 'L':
@@ -551,21 +551,22 @@ def identify_tsd_player_id(row):
              return 'N/A'     
          
    if row['serving_team_id'] == 'B':
-      if row['srv_flipped_ind'] == 'N' and row['server_switch_ind'] == 'N':
+     
+      if row['srv_flipped_ind'] == 'N' and row['server_switch_ind'] == 0:
           if row['third_shot_player_side'] == 'R':
               return player_b1_id
           if row['third_shot_player_side'] == 'L':
               return player_b2_id
           else:
               return 'N/A'
-      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 'N':
+      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 0:
           if row['third_shot_player_side'] == 'R':
              return player_b2_id
           if row['third_shot_player_side'] == 'L':
              return player_b1_id
           else:
              return 'N/A'
-      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 'Y':
+      if row['srv_flipped_ind'] == 'Y' and row['server_switch_ind'] == 1:
           if row['third_shot_player_side'] == 'R':
              return player_b1_id
           if row['third_shot_player_side'] == 'L':
