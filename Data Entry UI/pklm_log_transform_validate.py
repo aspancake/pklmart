@@ -162,12 +162,15 @@ for team in ['a', 'b']:
                                where (b.first_nm = ''' + player_2_first + '''and b.last_nm = ''' + player_2_last + ''')'''
                                , con=conn).iat[0, 0]
         
+        team_name = player_1_first + ' ' + player_1_last + ' & ' + player_2_first + ' ' + player_2_last
+        
         # inserting new values
         query = '''
             insert into pklm_prd.team
             values(''' + team_id + ''','''\
                    + "'" + player_1_id + "'" + ''','''\
-                   + '''1''' + ''')'''
+                   + '''1'''\
+                   + "'" + team_name + "'" + ''')'''
         curr.execute(query)
         conn.commit()
         
@@ -175,7 +178,8 @@ for team in ['a', 'b']:
             insert into pklm_prd.team
             values(''' + team_id + ''','''\
                    + "'" + player_2_id + "'" + ''','''\
-                   + '''2''' + ''')'''
+                   + '''2'''\
+                   + "'" + team_name + "'" + ''')'''        
         curr.execute(query)
         conn.commit()
 
@@ -642,6 +646,7 @@ pt_log_df['ending_player_id'] = pt_log_df.apply (lambda row: identify_ending_pla
 # first replace all nans with N/A
 pt_log_df.fillna('N/A', inplace=True)
 
+
 # also going to insert into the shot table while looping
 max_shot_id = pd.read_sql_query('''
                        select coalesce(max(substr(shot_id,2,16)::integer), 0) + 1
@@ -691,7 +696,3 @@ for i in list(range(len(pt_log_df))):
         curr.execute(query)
         conn.commit()               
         y += 1
-
-#%% 8) insert into shot
-# will get to this after we get "point" working
-

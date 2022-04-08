@@ -10,7 +10,7 @@ from os import chdir
 import pandas as pd
 
 # directories
-chdir('C:/Users/ASpan/OneDrive/Documents/Pickle/Data Entry UI')
+chdir('C:/Users/ASpan/OneDrive/Documents/pklmart/pickle-data-entry-ui')
 
 # baselining lists to append to
 tourn = []
