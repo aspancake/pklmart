@@ -1,0 +1,73 @@
+---
+title: "pklmart Match Report"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+# executing scripts to grab all necessary tables and values
+source('execute_queries.R')
+
+# additional libraries
+library(ggplot2)
+library(data.table)
+library(dplyr)
+library(reactable)
+
+# color palette to reference
+# https://coolors.co/001219-005f73-0a9396-94d2bd-e9d8a6-ee9b00-ca6702-bb3e03-ae2012-9b2226
+
+```
+
+## Match Overview
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Third Shot Breakdown
+
+```{r create_ts_objects, echo=FALSE}
+# getting a palette to always associate Drive with a value, and Drop with a value, and lob with a value
+myColors = c('#EE9B00', '#94D2BD')
+names(myColors) <- c('Drive', 'Drop')
+colScale <- scale_fill_manual(name = "ts_type", values = myColors)
+
+ts_breakdown_plt_a = ggplot(ts_summ_dt[team_id == "T1"], aes(x="", y=cnt, fill=ts_type)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  theme(legend.title=element_blank()) +
+  colScale + 
+  ggtitle(ts_summ_dt[team_id == 'T1', team_nm][1])
+
+ts_breakdown_plt_b = ggplot(ts_summ_dt[team_id == "T2"], aes(x="", y=cnt, fill=ts_type)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  theme_void() +
+  theme(legend.title=element_blank()) +
+  colScale
+```
+
+```{r ts_pie_charts, echo=FALSE, fig.width=4, fig.height=4, fig.show='hold'}
+ts_breakdown_plt_a
+ts_breakdown_plt_b
+```
+
+```{r ts_table, echo=FALSE}
+reactable(ts_by_team_breakdown_dt, columns = list(
+  team_id = colDef(name = 'Team'),
+  drop_cnt = colDef(name = 'Drop Cnt'),
+  drop_pct = colDef(name = 'Drop %', format = colFormat(percent = TRUE, digits = 2)),
+  drop_win_pct = colDef(name = 'Drop Win %', format = colFormat(percent = TRUE, digits = 1)),
+  drive_cnt = colDef(name = 'Drive Cnt'),
+  drive_pct = colDef(name = 'Drive %', format = colFormat(percent = TRUE, digits = 1)),
+  drive_win_pct = colDef(name = 'Drive Win %', format = colFormat(percent = TRUE, digits = 1)),
+  lob_cnt = colDef(name = 'Lob Cnt'),
+  lob_pct = colDef(name = 'Lob %', format = colFormat(percent = TRUE, digits = 1)),
+  lob_win_pct = colDef(name = 'Lob Win %', format = colFormat(percent = TRUE, digits = 1))
+  )
+) # percents not working
+
+```
